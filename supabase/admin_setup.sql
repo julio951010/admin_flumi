@@ -113,19 +113,23 @@ declare
   v_flumi_id uuid := '00000000-0000-0000-0000-00000000000f';
 begin
   if not exists (select 1 from auth.users where id = v_admin_id) then
+    -- Contraseña aleatoria y cuenta bloqueada: nadie debe iniciar sesión como
+    -- usuario de sistema; solo se usa como remitente vía enviar_mensaje_admin.
     insert into auth.users (id, email, encrypted_password, email_confirmed_at,
-                            raw_app_meta_data, created_at, updated_at)
+                            raw_app_meta_data, created_at, updated_at, banned_until)
     values (v_admin_id, 'sistema-administrador@flumi.local',
-            crypt('cambiar-este-password', gen_salt('bf')),
-            now(), '{"provider":"email"}', now(), now());
+            crypt(gen_random_uuid()::text, gen_salt('bf')),
+            now(), '{"provider":"email"}', now(), now(), now() + interval '100 years');
   end if;
 
   if not exists (select 1 from auth.users where id = v_flumi_id) then
+    -- Contraseña aleatoria y cuenta bloqueada: nadie debe iniciar sesión como
+    -- usuario de sistema; solo se usa como remitente vía enviar_mensaje_admin.
     insert into auth.users (id, email, encrypted_password, email_confirmed_at,
-                            raw_app_meta_data, created_at, updated_at)
+                            raw_app_meta_data, created_at, updated_at, banned_until)
     values (v_flumi_id, 'sistema-flumi@flumi.local',
-            crypt('cambiar-este-password', gen_salt('bf')),
-            now(), '{"provider":"email"}', now(), now());
+            crypt(gen_random_uuid()::text, gen_salt('bf')),
+            now(), '{"provider":"email"}', now(), now(), now() + interval '100 years');
   end if;
 
   insert into public.profiles (id, nombre)
