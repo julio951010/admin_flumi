@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../../config/tema.dart';
 import '../dashboard_servicio.dart';
-import '../../../config/tema.dart';
 
 /// Gráfico interactivo de 7 días para usuarios, mensajes y matches
 class Chart7D extends StatefulWidget {
@@ -44,7 +43,6 @@ class _Chart7DEstado extends State<Chart7D> with SingleTickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.serie.isEmpty) {
       return _buildEmptyState(colorScheme);
@@ -65,18 +63,38 @@ class _Chart7DEstado extends State<Chart7D> with SingleTickerProviderStateMixin 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header con selector de métrica
-          Row(
-            children: [
-              Text(
-                'Actividad 7 días',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              _buildMetricSelector(colorScheme),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 400) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Actividad 7 días',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildMetricSelector(colorScheme),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Text(
+                    'Actividad 7 días',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const Spacer(),
+                  _buildMetricSelector(colorScheme),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
           // Gráfico
@@ -300,8 +318,9 @@ class _Chart7DEstado extends State<Chart7D> with SingleTickerProviderStateMixin 
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        spacing: 2,
+        runSpacing: 2,
         children: MetricaActiva.values.map((metrica) {
           final isSelected = _metricaActiva == metrica;
           return Padding(

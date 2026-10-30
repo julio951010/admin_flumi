@@ -9,15 +9,24 @@ import 'widgets.dart';
 
 /// Panel principal: usuarios, actividad, pendientes y serie de 7 días.
 class DashboardPantalla extends StatefulWidget {
-  const DashboardPantalla({super.key});
+  final DashboardServicio? servicio;
+  final MetricasServicio? servicioMetricas;
+
+  const DashboardPantalla({
+    super.key,
+    this.servicio,
+    this.servicioMetricas,
+  });
 
   @override
   State<DashboardPantalla> createState() => _DashboardEstado();
 }
 
 class _DashboardEstado extends State<DashboardPantalla> with TickerProviderStateMixin {
-  late final DashboardServicio _servicio = DashboardServicio(Supabase.instance.client);
-  late final MetricasServicio _servicioMetricas = MetricasServicio(Supabase.instance.client);
+  late final DashboardServicio _servicio =
+      widget.servicio ?? DashboardServicio(Supabase.instance.client);
+  late final MetricasServicio _servicioMetricas =
+      widget.servicioMetricas ?? MetricasServicio(Supabase.instance.client);
   DashboardStats? _stats;
   MetricasInstalaciones? _instalaciones;
   String? _error;

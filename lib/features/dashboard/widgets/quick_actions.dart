@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../config/tema.dart';
-
 /// Acciones rápidas del dashboard
 class QuickActions extends StatelessWidget {
   final int reportesPendientes;
@@ -30,10 +28,10 @@ class QuickActions extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _QuickActionCard(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final tarjetas = [
+              _QuickActionCard(
                 icon: Icons.flag_rounded,
                 label: 'Reportes',
                 subtitle: '$reportesPendientes pendientes',
@@ -41,10 +39,7 @@ class QuickActions extends StatelessWidget {
                 count: reportesPendientes,
                 onTap: () => _navigate(context, '/reportes'),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _QuickActionCard(
+              _QuickActionCard(
                 icon: Icons.support_agent_rounded,
                 label: 'Soporte',
                 subtitle: '$soportesPendientes pendientes',
@@ -52,10 +47,7 @@ class QuickActions extends StatelessWidget {
                 count: soportesPendientes,
                 onTap: () => _navigate(context, '/soporte'),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _QuickActionCard(
+              _QuickActionCard(
                 icon: Icons.payments_rounded,
                 label: 'Pagos',
                 subtitle: '$pagosPendientes pendientes',
@@ -63,8 +55,30 @@ class QuickActions extends StatelessWidget {
                 count: pagosPendientes,
                 onTap: () => _navigate(context, '/pagos'),
               ),
-            ),
-          ],
+            ];
+
+            // En móvil las 3 tarjetas no caben en una fila sin desbordar:
+            // se apilan verticalmente.
+            if (constraints.maxWidth < 480) {
+              return Column(
+                children: [
+                  for (var i = 0; i < tarjetas.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 12),
+                    tarjetas[i],
+                  ],
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                for (var i = 0; i < tarjetas.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 12),
+                  Expanded(child: tarjetas[i]),
+                ],
+              ],
+            );
+          },
         ),
       ],
     );

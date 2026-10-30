@@ -10,15 +10,24 @@ import 'metricas_servicio.dart';
 
 /// Página de métricas: instalaciones anónimas + registros de usuarios.
 class MetricasPantalla extends StatefulWidget {
-  const MetricasPantalla({super.key});
+  final MetricasServicio? servicioMetricas;
+  final DashboardServicio? servicioDashboard;
+
+  const MetricasPantalla({
+    super.key,
+    this.servicioMetricas,
+    this.servicioDashboard,
+  });
 
   @override
   State<MetricasPantalla> createState() => _MetricasPantallaState();
 }
 
 class _MetricasPantallaState extends State<MetricasPantalla> {
-  final _servicioMetricas = MetricasServicio(Supabase.instance.client);
-  final _servicioDashboard = DashboardServicio(Supabase.instance.client);
+  late final MetricasServicio _servicioMetricas = widget.servicioMetricas ??
+      MetricasServicio(Supabase.instance.client);
+  late final DashboardServicio _servicioDashboard = widget.servicioDashboard ??
+      DashboardServicio(Supabase.instance.client);
 
   MetricasInstalaciones? _metricas;
   DashboardStats? _stats;
@@ -336,11 +345,13 @@ class _MetricasPantallaState extends State<MetricasPantalla> {
             children: [
               Icon(Icons.people_alt_rounded, size: 18, color: Tema.marca),
               const SizedBox(width: 8),
-              Text(
-                'Registros de usuarios',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+              Expanded(
+                child: Text(
+                  'Registros de usuarios',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
               ),
             ],
           ),
@@ -357,28 +368,22 @@ class _MetricasPantallaState extends State<MetricasPantalla> {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: (conversion / 100).clamp(0.0, 1.0),
-                    minHeight: 8,
-                    color: Tema.marca,
-                    backgroundColor:
-                        colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                  ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: (conversion / 100).clamp(0.0, 1.0),
+              minHeight: 8,
+              color: Tema.marca,
+              backgroundColor:
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${stats.usuariosTotal} registros / ${metricas.total} instalaciones',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '${stats.usuariosTotal} registros / ${metricas.total} instalaciones',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
           ),
         ],
       ),
