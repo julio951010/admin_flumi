@@ -54,14 +54,14 @@ class _EstadoAppPantallaState extends State<EstadoAppPantalla> {
           .inFilter('clave', _claves);
       final mapa = {
         for (final r in (res as List).cast<Map<String, dynamic>>())
-          (r['clave'] as String?) ?? '': (r['valor'] as String?) ?? ''
+          (r['clave'] as String?) ?? '': r['valor']
       };
       setState(() {
-        _mantenimiento = (mapa['mantenimiento'] ?? 'false') == 'true';
-        _mensajeMantCtrl.text = mapa['mantenimiento_mensaje'] ?? '';
-        _versionMinima = int.tryParse(mapa['version_minima_build'] ?? '1') ?? 1;
-        _urlCtrl.text = mapa['actualizar_url'] ?? '';
-        _mensajeActCtrl.text = mapa['actualizar_mensaje'] ?? '';
+        _mantenimiento = _parseBool(mapa['mantenimiento']);
+        _mensajeMantCtrl.text = _parseString(mapa['mantenimiento_mensaje']);
+        _versionMinima = _parseInt(mapa['version_minima_build']) ?? 1;
+        _urlCtrl.text = _parseString(mapa['actualizar_url']);
+        _mensajeActCtrl.text = _parseString(mapa['actualizar_mensaje']);
         _cargando = false;
       });
     } catch (e) {
@@ -69,15 +69,55 @@ class _EstadoAppPantallaState extends State<EstadoAppPantalla> {
     }
   }
 
+  bool _parseBool(dynamic v) {
+    if (v == null) return false;
+    if (v is bool) return v;
+    if (v is String) return v == 'true';
+    return false;
+  }
+
+  String _parseString(dynamic v) {
+    if (v == null) return '';
+    if (v is String) return v;
+    return v.toString();
+  }
+
+  int? _parseInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    if (v is String) return int.tryParse(v);
+    return null;
+  }
+
   Future<void> _guardar() async {
     setState(() => _guardando = true);
     try {
       final filas = [
-        {'clave': 'mantenimiento', 'valor': _mantenimiento.toString(), 'tipo': 'feature'},
-        {'clave': 'mantenimiento_mensaje', 'valor': _mensajeMantCtrl.text.trim(), 'tipo': 'feature'},
-        {'clave': 'version_minima_build', 'valor': _versionMinima.toString(), 'tipo': 'feature'},
-        {'clave': 'actualizar_url', 'valor': _urlCtrl.text.trim(), 'tipo': 'feature'},
-        {'clave': 'actualizar_mensaje', 'valor': _mensajeActCtrl.text.trim(), 'tipo': 'feature'},
+        {
+          'clave': 'mantenimiento',
+          'valor': _mantenimiento.toString(),
+          'tipo': 'bool',
+        },
+        {
+          'clave': 'mantenimiento_mensaje',
+          'valor': _mensajeMantCtrl.text.trim(),
+          'tipo': 'string',
+        },
+        {
+          'clave': 'version_minima_build',
+          'valor': _versionMinima.toString(),
+          'tipo': 'int',
+        },
+        {
+          'clave': 'actualizar_url',
+          'valor': _urlCtrl.text.trim(),
+          'tipo': 'string',
+        },
+        {
+          'clave': 'actualizar_mensaje',
+          'valor': _mensajeActCtrl.text.trim(),
+          'tipo': 'string',
+        },
       ];
       for (final f in filas) {
         await Supabase.instance.client.from('app_config').upsert(f, onConflict: 'clave');
@@ -138,7 +178,7 @@ class _EstadoAppPantallaState extends State<EstadoAppPantalla> {
                             subtitle: Text(_mantenimiento ? 'ACTIVO: la app no se puede usar' : 'Inactivo'),
                             value: _mantenimiento,
                             onChanged: (v) => setState(() => _mantenimiento = v),
-                            activeColor: Tema.marca,
+                            activeThumbColor: Tema.marca,
                           ),
                           TextField(
                             controller: _mensajeMantCtrl,

@@ -113,7 +113,7 @@ class _SoportePantallaState extends State<SoportePantalla> {
               Switch(
                 value: _soloPendientes,
                 onChanged: (v) => setState(() { _soloPendientes = v; _cargar(); }),
-                activeColor: Tema.marca,
+                activeThumbColor: Tema.marca,
               ),
             ],
           ),

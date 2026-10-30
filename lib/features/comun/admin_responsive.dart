@@ -33,7 +33,7 @@ class AdminResponsiveLayout extends StatelessWidget {
 
         final horizontalPadding = isMobile
             ? 16.0
-            : AdminBreakpoints.isTablet(constraints.maxWidth)
+            : isTablet
                 ? 24.0
                 : 32.0;
         final verticalPadding = isMobile ? 16.0 : 24.0;
@@ -46,17 +46,13 @@ class AdminResponsiveLayout extends StatelessWidget {
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
               maxWidth: isMobile
                   ? double.infinity
-                  : AdminBreakpoints.isTablet(constraints.maxWidth)
+                  : isTablet
                       ? 800
                       : 1200,
             ),
-            child: IntrinsicWidth(
-              stepWidth: double.infinity,
-              child: child,
-            ),
+            child: child,
           ),
         );
       },
@@ -88,15 +84,14 @@ class AdminPageHeader extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.only(
             bottom: 16,
-            left: AdminBreakpoints.isMobile(constraints.maxWidth) ? 16 : 24,
-            right: AdminBreakpoints.isMobile(constraints.maxWidth) ? 16 : 24,
+            left: isMobile ? 16 : 24,
+            right: isMobile ? 16 : 24,
             top: 8,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (AdminBreakpoints.isMobile(constraints.maxWidth) ||
-                  Navigator.of(context).canPop())
+              if (isMobile || Navigator.of(context).canPop())
                 IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new),
                   onPressed: onBack ?? () => Navigator.of(context).maybePop(),
@@ -128,6 +123,7 @@ class AdminPageHeader extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
               if (acciones != null && acciones!.isNotEmpty)
                 Wrap(
                   spacing: 8,
@@ -135,8 +131,7 @@ class AdminPageHeader extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: acciones!,
                 ),
-              ],
-            ),
+            ],
           ),
         );
       },
@@ -194,10 +189,11 @@ class AdminStatsRow extends StatelessWidget {
         int crossAxisCount;
         double childAspectRatio;
 
-        if (AdminBreakpoints.isMobile(MediaQuery.of(context).size.width)) {
+        final width = MediaQuery.of(context).size.width;
+        if (AdminBreakpoints.isMobile(width)) {
           crossAxisCount = 2;
           childAspectRatio = 1.6;
-        } else if (AdminBreakpoints.isTablet(MediaQuery.of(context).size.width)) {
+        } else if (AdminBreakpoints.isTablet(width)) {
           crossAxisCount = 3;
           childAspectRatio = 1.8;
         } else {
@@ -240,7 +236,7 @@ class AdminStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = this.color ?? Theme.of(context).colorScheme.primary;
+    final cardColor = color ?? Theme.of(context).colorScheme.primary;
 
     return InkWell(
       onTap: onTap,
@@ -268,11 +264,10 @@ class AdminStatCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: (color ?? Theme.of(context).colorScheme.primary)
-                        .withValues(alpha: 0.15),
+                    color: cardColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icono, color: color ?? Theme.of(context).colorScheme.primary, size: 22),
+                  child: Icon(icono, color: cardColor, size: 22),
                 ),
                 const Spacer(),
               ],
@@ -339,8 +334,6 @@ class AdminActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = this.color ?? Theme.of(context).colorScheme.primary;
-
     return SizedBox(
       width: expanded ? double.infinity : null,
       child: FilledButton.icon(
@@ -390,7 +383,7 @@ class AdminTextField extends StatelessWidget {
     this.onChanged,
     this.maxLines = 1,
     this.maxLength,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +420,7 @@ class AdminStatusChip extends StatelessWidget {
     required this.color,
     this.icono,
     this.outlined = false,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +473,7 @@ class AdminStatusChip extends StatelessWidget {
           ),
         ],
       ),
-    });
+    );
   }
 }
 
@@ -493,7 +486,7 @@ class AdminSectionDivider extends StatelessWidget {
     super.key,
     required this.texto,
     this.icono,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -523,7 +516,7 @@ class AdminSectionDivider extends StatelessWidget {
           ),
         ],
       ),
-    });
+    );
   }
 }
 
@@ -540,20 +533,17 @@ class AdminFloatingActionButton extends StatelessWidget {
     required this.icono,
     this.tooltip,
     this.label,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: onPressed,
       icon: Icon(icono),
-      label: label != null ? Text(label!) : null,
-      style: FilledButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
+      label: label != null ? Text(label!) : const SizedBox.shrink(),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 }
@@ -589,28 +579,28 @@ Future<T?> showAdminBottomSheet<T>({
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          if (true) ...[
+          if (titulo != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
                 children: [
-                  if (true)
-                    Expanded(
-                      child: Text(
-                        'Título',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                  Expanded(
+                    child: Text(
+                      titulo,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 28),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
+            ),
             const Divider(height: 1),
           ],
           Flexible(
@@ -621,8 +611,8 @@ Future<T?> showAdminBottomSheet<T>({
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// Switch tile adaptado
@@ -640,7 +630,7 @@ class AdminSwitchTile extends StatelessWidget {
     required this.valor,
     required this.onChanged,
     this.iconoInicial,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -659,7 +649,7 @@ class AdminSwitchTile extends StatelessWidget {
       trailing: Switch(
         value: valor,
         onChanged: onChanged,
-        activeColor: Theme.of(context).colorScheme.primary,
+        activeThumbColor: Theme.of(context).colorScheme.primary,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
@@ -681,12 +671,10 @@ class AdminPage extends StatelessWidget {
     required this.children,
     this.accionesHeader,
     this.onBack,
-  })
+  });
 
   @override
   Widget build(BuildContext context) {
-    final secundario = Theme.of(context).colorScheme.secondary;
-
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
@@ -707,9 +695,8 @@ class AdminPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         actions: [
-          if (accionesHeader != null) ...accionesHeader!,
+          ...?accionesHeader,
         ],
       ),
       body: SafeArea(
@@ -730,14 +717,3 @@ class AdminPage extends StatelessWidget {
     );
   }
 }
-
-class _Seccion {
-  final IconData icono;
-  final String etiqueta;
-  final Widget pantalla;
-
-  const _Seccion(this.icono, this.etiqueta, this.pantalla);
-}
-</parameter>
-</function>
-</tool_call>

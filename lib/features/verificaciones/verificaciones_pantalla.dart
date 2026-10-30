@@ -739,48 +739,86 @@ class _DetalleVerificacionSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            // Tres imágenes lado a lado
-            Row(
-              children: [
-                // 1. Foto principal del perfil
-                Expanded(
-                  child: _ImagenComparacion(
-                    titulo: 'Foto perfil',
-                    subtitulo: 'Principal',
-                    url: fotoPrincipal,
-                    assetFallback: null,
-                    onTap: () => onImagenTap(fotoPrincipal, 'Foto de perfil de $nombre'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 2. Gesto a imitar
-                Expanded(
-                  child: _ImagenComparacion(
-                    titulo: 'Gesto',
-                    subtitulo: 'A imitar',
-                    url: '',
-                    assetFallback: gestoAsset,
-                    onTap: () => onImagenTap(gestoAsset, 'Gesto solicitado: ${gesto.split('/').last}', isAsset: true),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 3. Selfie enviada
-                Expanded(
-                  child: _ImagenComparacion(
-                    titulo: 'Selfie',
-                    subtitulo: 'Enviada',
-                    url: selfie,
-                    assetFallback: null,
-                    onTap: () => onImagenTap(selfie, 'Selfie de verificación de $nombre'),
-                  ),
-                ),
-              ],
+            // Tres imágenes: apiladas en móvil, lado a lado en tablet+
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 500;
+                if (isNarrow) {
+                  return Column(
+                    children: [
+                      _ImagenComparacion(
+                        titulo: 'Foto perfil',
+                        subtitulo: 'Principal',
+                        url: fotoPrincipal,
+                        assetFallback: null,
+                        onTap: () => onImagenTap(fotoPrincipal, 'Foto de perfil de $nombre'),
+                      ),
+                      const SizedBox(height: 12),
+                      _ImagenComparacion(
+                        titulo: 'Gesto',
+                        subtitulo: 'A imitar',
+                        url: '',
+                        assetFallback: gestoAsset,
+                        onTap: () => onImagenTap(gestoAsset, 'Gesto solicitado: ${gesto.split('/').last}', isAsset: true),
+                      ),
+                      const SizedBox(height: 12),
+                      _ImagenComparacion(
+                        titulo: 'Selfie',
+                        subtitulo: 'Enviada',
+                        url: selfie,
+                        assetFallback: null,
+                        onTap: () => onImagenTap(selfie, 'Selfie de verificación de $nombre'),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    // 1. Foto principal del perfil
+                    Expanded(
+                      child: _ImagenComparacion(
+                        titulo: 'Foto perfil',
+                        subtitulo: 'Principal',
+                        url: fotoPrincipal,
+                        assetFallback: null,
+                        onTap: () => onImagenTap(fotoPrincipal, 'Foto de perfil de $nombre'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // 2. Gesto a imitar
+                    Expanded(
+                      child: _ImagenComparacion(
+                        titulo: 'Gesto',
+                        subtitulo: 'A imitar',
+                        url: '',
+                        assetFallback: gestoAsset,
+                        onTap: () => onImagenTap(gestoAsset, 'Gesto solicitado: ${gesto.split('/').last}', isAsset: true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // 3. Selfie enviada
+                    Expanded(
+                      child: _ImagenComparacion(
+                        titulo: 'Selfie',
+                        subtitulo: 'Enviada',
+                        url: selfie,
+                        assetFallback: null,
+                        onTap: () => onImagenTap(selfie, 'Selfie de verificación de $nombre'),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 20),
             // Acciones
-            Row(
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
               children: [
-                Expanded(
+                SizedBox(
+                  width: 160,
                   child: OutlinedButton.icon(
                     onPressed: onRechazar,
                     icon: const Icon(Icons.close_rounded, size: 18),
@@ -794,8 +832,8 @@ class _DetalleVerificacionSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
+                SizedBox(
+                  width: 160,
                   child: FilledButton.icon(
                     onPressed: onAprobar,
                     icon: const Icon(Icons.check_rounded, size: 18),
@@ -844,99 +882,102 @@ class _ImagenComparacion extends StatelessWidget {
       child: InkWell(
         onTap: hasImage ? onTap : null,
         borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              children: [
-                // Etiquetas arriba
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    border: Border(
-                      bottom: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 200),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Etiquetas arriba
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  border: Border(
+                    bottom: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      titulo,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        titulo,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onSurface,
-                          fontSize: 11,
-                        ),
+                    Text(
+                      subtitulo,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 10,
                       ),
-                      Text(
-                        subtitulo,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                // Imagen
-                Expanded(
-                  child: hasImage
-                      ? ClipRRect(
-                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              isAsset
-                                  ? Image.asset(
-                                      assetFallback!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => _buildPlaceholder(context, 'Gesto no encontrado'),
-                                    )
-                                  : Image.network(
-                                      url,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, progress) {
-                                        if (progress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: progress.expectedTotalBytes != null
-                                                ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                                                : null,
-                                            strokeWidth: 2,
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (_, __, ___) => _buildPlaceholder(context, 'No se pudo cargar'),
-                                    ),
-                              // Overlay indicador de zoom
-                              Positioned(
-                                bottom: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.6),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Icon(Icons.zoom_in_rounded, color: Colors.white, size: 16),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : _buildPlaceholder(context, 'Sin imagen'),
-                ),
-              ],
-            ),
+              ),
+              // Imagen
+              _buildImageWidget(context, hasImage, isAsset),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageWidget(BuildContext context, bool hasImage, bool isAsset) {
+    if (!hasImage) {
+      return _buildPlaceholder(context, 'Sin imagen');
+    }
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          isAsset
+              ? Image.asset(
+                  assetFallback!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _buildPlaceholder(context, 'Gesto no encontrado'),
+                )
+              : Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: progress.expectedTotalBytes != null
+                            ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                            : null,
+                        strokeWidth: 2,
+                      ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => _buildPlaceholder(context, 'No se pudo cargar'),
+                ),
+          // Overlay indicador de zoom
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.zoom_in_rounded, color: Colors.white, size: 16),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -975,7 +1016,6 @@ class _VisorImagen extends StatelessWidget {
     required this.url,
     required this.titulo,
     this.isAsset = false,
-    super.key,
   });
 
   @override
@@ -1029,11 +1069,10 @@ class _StatChip extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _StatChip(this.label, this.value, this.icon, this.color, {super.key});
+  const _StatChip(this.label, this.value, this.icon, this.color);
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -1059,3 +1098,5 @@ class _StatChip extends StatelessWidget {
     );
   }
 }
+
+

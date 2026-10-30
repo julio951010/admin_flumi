@@ -249,7 +249,7 @@ class _FlagTile extends StatelessWidget {
           ? Switch(
               value: flag.valorBool,
               onChanged: onToggle,
-              activeColor: Tema.marca,
+              activeThumbColor: Tema.marca,
             )
           : onEditarString != null
               ? IconButton(

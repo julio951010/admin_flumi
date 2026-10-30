@@ -97,10 +97,12 @@ class _PagosConfigPantallaState extends State<PagosConfigPantalla> {
                             ],
                           );
                         }
-                        return Column(
-                          children: [
-                            for (final c in _configs) _PagoConfigCard(config: c, onGuardar: _guardar, onRecargar: _cargar),
-                          ],
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _configs.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (_, i) => _PagoConfigCard(config: _configs[i], onGuardar: _guardar, onRecargar: _cargar),
                         );
                       },
                     ),
@@ -232,7 +234,7 @@ class _PagoConfigCardState extends State<_PagoConfigCard> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(child: Text(c.metodo == 'transfermovil' ? 'Transfermóvil' : 'EnZona', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                Switch(value: c.activo, onChanged: (v) => _alternarActivo(v), activeColor: Tema.marca),
+                Switch(value: c.activo, onChanged: (v) => _alternarActivo(v), activeThumbColor: Tema.marca),
                 Text(c.activo ? 'Activo' : 'Inactivo', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
@@ -277,10 +279,10 @@ class _PagoConfigCardState extends State<_PagoConfigCard> {
                           _ctrlQr.clear();
                           _subiendo = false;
                         });
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('QR eliminado. Guarda para aplicar.')));
+                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('QR eliminado. Guarda para aplicar.')));
                       } catch (e) {
                         setState(() => _subiendo = false);
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error eliminando QR: $e')));
+                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error eliminando QR: $e')));
                       }
                     },
                     child: _subiendo

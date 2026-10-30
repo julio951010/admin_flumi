@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../config/tema.dart';
-
 /// Skeleton loading para el dashboard completo
 class SkeletonDashboard extends StatelessWidget {
   const SkeletonDashboard({super.key});

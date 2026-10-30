@@ -12,7 +12,14 @@ import 'features/comun/sin_conexion_pantalla.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseAnonKey);
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabaseAnonKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
+  );
   final sesion = AdminSesion(Supabase.instance.client);
   await sesion.iniciarDesdeSesion();
   final conectividad = ConectividadServicio();

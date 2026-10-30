@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../config/tema.dart';
-import 'limpiar_interacciones_admin_pantalla.dart';
 import 'enviar_mensaje_admin_pantalla.dart';
 import 'buscar_email_pantalla.dart';
 
@@ -132,24 +131,6 @@ class _HerramientasPantallaState extends State<HerramientasPantalla>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Categoría: Mantenimiento
-        _buildSectionTitle('Mantenimiento', colorScheme),
-        const SizedBox(height: 12),
-        _buildToolCard(
-          index: 0,
-          icon: Icons.delete_sweep_outlined,
-          title: 'Limpiar interacciones (pruebas)',
-          subtitle: 'Borra nopes, likes, visitas, matches, mensajes, bloqueos, reportes, usos diarios y pagos pendientes. Conserva perfiles y suscripciones.',
-          color: Colors.red,
-          danger: true,
-          colorScheme: colorScheme,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const LimpiarInteraccionesAdminPantalla()),
-          ),
-        ),
-        const SizedBox(height: 24),
-
         // Categoría: Comunicación
         _buildSectionTitle('Comunicación', colorScheme),
         const SizedBox(height: 12),

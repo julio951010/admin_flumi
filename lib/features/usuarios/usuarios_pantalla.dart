@@ -419,14 +419,18 @@ class _UsuariosPantallaState extends State<UsuariosPantalla>
     return AnimatedBuilder(
       animation: _staggerController,
       builder: (context, child) {
+        final width = MediaQuery.of(context).size.width;
+        // Responsive aspect ratio: taller on narrow screens
+        final aspectRatio = width < 400 ? 0.65 : width < 600 ? 0.75 : 0.85;
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 0.85,
+            childAspectRatio: aspectRatio,
           ),
           itemCount: _usuarios.length + (_hayMas && !_cargando ? 1 : 0),
           itemBuilder: (context, i) {

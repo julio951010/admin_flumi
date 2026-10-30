@@ -311,8 +311,11 @@ class UsuarioCardGrid extends StatelessWidget {
                 ),
               const Spacer(),
               // Footer: edad + última conexión
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   if (usuario.edad != null)
                     _InfoChip(

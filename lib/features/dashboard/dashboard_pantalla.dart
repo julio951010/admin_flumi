@@ -30,7 +30,6 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
   DashboardStats? _stats;
   MetricasInstalaciones? _instalaciones;
   String? _error;
-  DateTime? _actualizado;
   bool _cargando = true;
 
   late final AnimationController _fadeController;
@@ -93,7 +92,6 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
       setState(() {
         _stats = stats;
         _instalaciones = instalaciones;
-        _actualizado = DateTime.now();
         _error = null;
       });
       _staggerController.reset();
@@ -117,7 +115,6 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
       setState(() {
         _stats = stats;
         _instalaciones = instalaciones;
-        _actualizado = DateTime.now();
         _error = null;
       });
       _fadeController.forward();
@@ -452,14 +449,5 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
         ),
       ),
     );
-  }
-
-  String _formatTime(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inSeconds < 60) return 'hace un momento';
-    if (diff.inMinutes < 60) return 'hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
-    return '${dt.day}/${dt.month} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
