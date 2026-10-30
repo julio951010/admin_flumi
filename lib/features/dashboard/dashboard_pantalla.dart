@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../config/tema.dart';
+import '../metricas/chart_instalaciones_30d.dart';
+import '../metricas/metricas_servicio.dart';
 import 'dashboard_servicio.dart';
 import 'widgets.dart';
 
@@ -15,7 +17,9 @@ class DashboardPantalla extends StatefulWidget {
 
 class _DashboardEstado extends State<DashboardPantalla> with TickerProviderStateMixin {
   late final DashboardServicio _servicio = DashboardServicio(Supabase.instance.client);
+  late final MetricasServicio _servicioMetricas = MetricasServicio(Supabase.instance.client);
   DashboardStats? _stats;
+  MetricasInstalaciones? _instalaciones;
   String? _error;
   DateTime? _actualizado;
   bool _cargando = true;
@@ -36,11 +40,15 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
       vsync: this,
     );
     _cardAnimations = List.generate(
-      8,
+      16,
       (index) => Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _staggerController,
-          curve: Interval(index * 0.1, (0.6 + index * 0.1).clamp(0.0, 1.0), curve: Curves.easeOutCubic),
+          curve: Interval(
+            (index * 0.05).clamp(0.0, 0.7),
+            ((index * 0.05) + 0.3).clamp(0.0, 1.0),
+            curve: Curves.easeOutCubic,
+          ),
         ),
       ),
     );
@@ -54,6 +62,16 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
     super.dispose();
   }
 
+  Future<(DashboardStats, MetricasInstalaciones?)> _obtenerTodo() async {
+    // Las dos llamadas arrancan en paralelo. Si la RPC de instalaciones aún
+    // no existe, `obtenerOpcional` devuelve null y el dashboard sigue igual.
+    final statsF = _servicio.obtener();
+    final instF = _servicioMetricas.obtenerOpcional();
+    final stats = await statsF;
+    final instalaciones = await instF;
+    return (stats, instalaciones);
+  }
+
   Future<void> _refrescar() async {
     if (_cargando) return;
     setState(() {
@@ -61,10 +79,11 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
       _error = null;
     });
     try {
-      final stats = await _servicio.obtener();
+      final (stats, instalaciones) = await _obtenerTodo();
       if (!mounted) return;
       setState(() {
         _stats = stats;
+        _instalaciones = instalaciones;
         _actualizado = DateTime.now();
         _error = null;
       });
@@ -84,10 +103,11 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
       _error = null;
     });
     try {
-      final stats = await _servicio.obtener();
+      final (stats, instalaciones) = await _obtenerTodo();
       if (!mounted) return;
       setState(() {
         _stats = stats;
+        _instalaciones = instalaciones;
         _actualizado = DateTime.now();
         _error = null;
       });
@@ -133,25 +153,12 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
         title: FadeTransition(
           opacity: _fadeController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Dashboard',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              if (_actualizado != null)
-                Text(
-                  'Actualizado ${_formatTime(_actualizado!)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-            ],
+          child: Text(
+            'Dashboard',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
         background: Container(
@@ -200,6 +207,10 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
           _buildStatsGrid(),
           const SizedBox(height: 24),
           _buildChartSection(),
+          if (_instalaciones != null) ...[
+            const SizedBox(height: 24),
+            _buildInstallChart(),
+          ],
           const SizedBox(height: 24),
           _buildQuickActions(),
         ],
@@ -209,6 +220,7 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
 
   Widget _buildStatsGrid() {
     final stats = _stats!;
+    final inst = _instalaciones;
     final cards = [
       StatConfig(
         'Usuarios totales',
@@ -226,6 +238,32 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
         trend: '+${stats.usuariosHoy} hoy',
         trendPositive: true,
       ),
+      if (inst != null) ...[
+        StatConfig(
+          'Instalaciones',
+          inst.total,
+          Icons.download_rounded,
+          Colors.indigo,
+          trend: inst.nuevasHoy > 0 ? '+${inst.nuevasHoy} hoy' : null,
+          trendPositive: true,
+        ),
+        StatConfig(
+          'Instal. activas',
+          inst.activas30d,
+          Icons.bolt_rounded,
+          Colors.teal,
+          trend: 'últimos 30d',
+          trendPositive: true,
+        ),
+        StatConfig(
+          'Nuevas inst. 7d',
+          inst.nuevas7d,
+          Icons.person_add_alt_1_rounded,
+          Colors.lightGreen,
+          trend: inst.nuevasHoy > 0 ? '+${inst.nuevasHoy} hoy' : null,
+          trendPositive: true,
+        ),
+      ],
       StatConfig(
         'En línea',
         stats.enLinea,
@@ -328,6 +366,22 @@ class _DashboardEstado extends State<DashboardPantalla> with TickerProviderState
           curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic),
         )),
         child: Chart7D(serie: _stats!.serie7d),
+      ),
+    );
+  }
+
+  Widget _buildInstallChart() {
+    return FadeTransition(
+      opacity: _fadeController,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.2),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: _staggerController,
+          curve: const Interval(0.45, 1.0, curve: Curves.easeOutCubic),
+        )),
+        child: ChartInstalaciones30d(serie: _instalaciones!.serie30d),
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../configuracion/feature_flags_pantalla.dart';
 import '../contenidos/contenidos_pantalla.dart';
 import '../dashboard/dashboard_pantalla.dart';
 import '../herramientas/herramientas_pantalla.dart';
+import '../metricas/metricas_pantalla.dart';
 import '../pagos/pagos_config_pantalla.dart';
 import '../pagos/pagos_pendientes_pantalla.dart';
 import '../redes/redes_pantalla.dart';
@@ -32,6 +33,7 @@ class _AdminShellState extends State<AdminShell> {
 
   final List<_Seccion> _secciones = const [
     _Seccion(Icons.dashboard_outlined, 'Dashboard', DashboardPantalla()),
+    _Seccion(Icons.insights_rounded, 'Métricas', MetricasPantalla()),
     _Seccion(Icons.people, 'Usuarios', UsuariosPantalla()),
     _Seccion(Icons.flag, 'Reportes', ReportesPantalla()),
     _Seccion(Icons.support_agent, 'Soporte', SoportePantalla()),
@@ -49,147 +51,186 @@ class _AdminShellState extends State<AdminShell> {
 
   @override
   Widget build(BuildContext context) {
-    final sesion = context.watch<AdminSesion>();
-    final contenido = _secciones[_indice].pantalla;
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Desktop: sidebar fijo
-        if (!AdminBreakpoints.isMobile(constraints.maxWidth) && constraints.maxWidth >= 900) {
-          return Scaffold(
-            body: Row(
-              children: [
-                SizedBox(
-                  width: 260,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(
-                        right: BorderSide(color: Colors.grey.shade200),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        _encabezado(sesion),
-                        const Divider(height: 1),
-                        for (int i = 0; i < _secciones.length; i++)
-                          _item(_secciones[i].icono, _secciones[i].etiqueta,
-                              _indice == i, () => _seleccionar(i)),
-                        const Spacer(),
-                        const Divider(height: 1),
-                        _cerrarSesion(sesion),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      const BannerSinConexion(),
-                      Expanded(
-                        child: AdminResponsiveLayout(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                          child: contenido,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
+        if (constraints.maxWidth >= 900 && !AdminBreakpoints.isMobile(constraints.maxWidth)) {
+          return _buildDesktop();
+        } else if (constraints.maxWidth >= 600 && constraints.maxWidth < 900) {
+          return _buildTablet();
+        } else {
+          return _buildMobile();
         }
+      },
+    );
+  }
 
-        // Tablet: sidebar colapsable
-        if (constraints.maxWidth >= 600 && constraints.maxWidth < 900) {
-          return Scaffold(
-            body: Row(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: _sidebarExpandido ? 260 : 72,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(
-                        right: BorderSide(color: Colors.grey.shade200),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        _encabezado(sesion),
-                        const Divider(height: 1),
-                        for (int i = 0; i < _secciones.length; i++)
-                          _itemColapsable(_secciones[i].icono, _secciones[i].etiqueta,
-                              _indice == i, () => _seleccionar(i)),
-                        const Spacer(),
-                        const Divider(height: 1),
-                        _cerrarSesion(sesion),
-                      ],
-                    ),
-                  ),
+  Widget _buildDesktop() {
+    return Scaffold(
+      body: Row(
+        children: [
+          SizedBox(
+            width: 260,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  right: BorderSide(color: Colors.grey.shade200),
                 ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      const BannerSinConexion(),
-                      Expanded(
-                        child: AdminResponsiveLayout(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                          child: contenido,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // Mobile: drawer
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Admin Flumi'),
-            leading: Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openDrawer(),
               ),
+              child: _SidebarDesktop(),
             ),
           ),
-          drawer: Drawer(
+          Expanded(
             child: Column(
               children: [
-                _encabezado(sesion),
-                const Divider(height: 1),
-                for (int i = 0; i < _secciones.length; i++)
-                  _item(
-                    _secciones[i].icono,
-                    _secciones[i].etiqueta,
-                    _indice == i,
-                    () {
-                      Navigator.pop(context);
-                      _seleccionar(i);
-                    },
+                const BannerSinConexion(),
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                      child: _secciones[_indice].pantalla,
+                    ),
                   ),
-                const Spacer(),
-                const Divider(height: 1),
-                _cerrarSesion(sesion),
+                ),
               ],
             ),
           ),
-          body: Column(
-            children: [
-              const BannerSinConexion(),
-              Expanded(
-                child: AdminResponsiveLayout(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  child: contenido,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTablet() {
+    return Scaffold(
+      body: Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: _sidebarExpandido ? 260 : 72,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  right: BorderSide(color: Colors.grey.shade200),
                 ),
               ),
-            ],
+              child: _SidebarTablet(),
+            ),
           ),
+          Expanded(
+            child: Column(
+              children: [
+                const BannerSinConexion(),
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                      child: _secciones[_indice].pantalla,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobile() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Flumi'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: _SidebarMobile(),
+      ),
+      body: Column(
+        children: [
+          const BannerSinConexion(),
+          Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                child: _secciones[_indice].pantalla,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _SidebarDesktop() {
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: _secciones.length + 4,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        if (index == 0) return _encabezado(context.read<AdminSesion>());
+        if (index == 1) return const Divider(height: 1);
+        if (index == _secciones.length + 2) return const Divider(height: 1);
+        if (index == _secciones.length + 3) return _cerrarSesion(context.read<AdminSesion>());
+        final i = index - 2;
+        if (i < 0 || i >= _secciones.length) return const SizedBox.shrink();
+        return _item(
+          _secciones[i].icono,
+          _secciones[i].etiqueta,
+          _indice == i,
+          () => _seleccionar(i),
+        );
+      },
+    );
+  }
+
+  Widget _SidebarTablet() {
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: _secciones.length + 4,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        if (index == 0) return _encabezado(context.read<AdminSesion>());
+        if (index == 1) return const Divider(height: 1);
+        if (index == _secciones.length + 2) return const Divider(height: 1);
+        if (index == _secciones.length + 3) return _cerrarSesion(context.read<AdminSesion>());
+        final i = index - 2;
+        if (i < 0 || i >= _secciones.length) return const SizedBox.shrink();
+        return _itemColapsable(
+          _secciones[i].icono,
+          _secciones[i].etiqueta,
+          _indice == i,
+          () => _seleccionar(i),
+        );
+      },
+    );
+  }
+
+  Widget _SidebarMobile() {
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: _secciones.length + 4,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        if (index == 0) return _encabezado(context.read<AdminSesion>());
+        if (index == 1) return const Divider(height: 1);
+        if (index == _secciones.length + 2) return const Divider(height: 1);
+        if (index == _secciones.length + 3) return _cerrarSesion(context.read<AdminSesion>());
+        final i = index - 2;
+        if (i < 0 || i >= _secciones.length) return const SizedBox.shrink();
+        return _item(
+          _secciones[i].icono,
+          _secciones[i].etiqueta,
+          _indice == i,
+          () => _seleccionar(i),
         );
       },
     );
@@ -272,7 +313,7 @@ class _AdminShellState extends State<AdminShell> {
         ),
       );
 
-@override
+  @override
   void dispose() {
     super.dispose();
   }
