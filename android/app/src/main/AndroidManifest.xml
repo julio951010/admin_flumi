@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Necesario en release: los manifests de debug/profile lo añaden para
+         hot reload, pero el APK de release sin esto no tiene red y el login
+         falla con "Sin conexión". -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
         android:label="Admin Flumi"
         android:name="${applicationName}"
