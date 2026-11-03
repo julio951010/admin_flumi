@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../config/tema.dart';
-import 'enviar_mensaje_admin_pantalla.dart';
+import '../mensajes/mensajes_pantalla.dart';
 import 'buscar_email_pantalla.dart';
 
 class HerramientasPantalla extends StatefulWidget {
@@ -136,14 +136,27 @@ class _HerramientasPantallaState extends State<HerramientasPantalla>
         const SizedBox(height: 12),
         _buildToolCard(
           index: 1,
-          icon: Icons.send_outlined,
-          title: 'Enviar mensaje como Admin / Flumi',
-          subtitle: 'Envía mensajes a usuarios desde el perfil del sistema "Administrador" o "Flumi". Útil para anuncios, bienvenidas o notificaciones.',
+          icon: Icons.forum_outlined,
+          title: 'Mensajes a usuarios',
+          subtitle: 'Historial, plantillas y envíos desde Administrador o Flumi, con envío masivo por segmentos.',
           color: Colors.blue,
           colorScheme: colorScheme,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const EnviarMensajeAdminPantalla()),
+            MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(title: const Text('Mensajes')),
+                body: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: const MensajesPantalla(
+                      tabInicial: 1,
+                      mostrarTitulo: false,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 12),

@@ -8,6 +8,7 @@ import '../configuracion/feature_flags_pantalla.dart';
 import '../contenidos/contenidos_pantalla.dart';
 import '../dashboard/dashboard_pantalla.dart';
 import '../herramientas/herramientas_pantalla.dart';
+import '../mensajes/mensajes_pantalla.dart';
 import '../metricas/metricas_pantalla.dart';
 import '../pagos/pagos_config_pantalla.dart';
 import '../pagos/pagos_pendientes_pantalla.dart';
@@ -37,6 +38,7 @@ class _AdminShellState extends State<AdminShell> {
     _Seccion(Icons.people, 'Usuarios', UsuariosPantalla()),
     _Seccion(Icons.flag, 'Reportes', ReportesPantalla()),
     _Seccion(Icons.support_agent, 'Soporte', SoportePantalla()),
+    _Seccion(Icons.forum_outlined, 'Mensajes', MensajesPantalla()),
     _Seccion(Icons.verified_outlined, 'Verificaciones', VerificacionesPantalla()),
     _Seccion(Icons.payments, 'Método de pago', PagosConfigPantalla()),
     _Seccion(Icons.receipt_long, 'Pagos pendientes', PagosPendientesPantalla()),
