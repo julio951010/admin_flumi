@@ -28,7 +28,11 @@ class _FeatureFlagsPantallaState extends State<FeatureFlagsPantalla> {
   /// 'true'/'false', que es como las lee flumi_app). El resto son texto.
   /// (La tabla viva solo tiene clave/valor/tipo; no hay columnas de
   /// descripción ni auditoría.)
-  static const _boolKeys = {'suscripciones_habilitadas', 'mantenimiento'};
+  static const _boolKeys = {
+    'suscripciones_habilitadas',
+    'mensajes_requieren_plus',
+    'mantenimiento',
+  };
 
   Future<void> _cargar() async {
     setState(() {
