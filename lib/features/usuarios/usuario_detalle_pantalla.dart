@@ -37,7 +37,6 @@ const _optBuscaGenero = <(String, String)>[
   ('Mujeres', 'mujeres'),
   ('Personas no binarias', 'no_binarias'),
   ('Todos/as', 'todos'),
-  ('Prefiero no decirlo', 'prefiero_no_decirlo'),
 ];
 
 const _optQueBusca = <(String, String)>[
