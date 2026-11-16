@@ -7,6 +7,7 @@ import 'admin_responsive.dart';
 import '../configuracion/feature_flags_pantalla.dart';
 import '../contenidos/contenidos_pantalla.dart';
 import '../dashboard/dashboard_pantalla.dart';
+import '../estado/estado_app_pantalla.dart';
 import '../herramientas/herramientas_pantalla.dart';
 import '../mensajes/mensajes_pantalla.dart';
 import '../metricas/metricas_pantalla.dart';
@@ -47,6 +48,7 @@ class _AdminShellState extends State<AdminShell> {
     _Seccion(Icons.share_outlined, 'Redes sociales', RedesPantalla()),
     _Seccion(Icons.info_outline, 'Sobre nosotros', SobreNosotrosPantalla()),
     _Seccion(Icons.settings, 'Feature Flags', FeatureFlagsPantalla()),
+    _Seccion(Icons.system_update_outlined, 'Estado de la app', EstadoAppPantalla()),
   ];
 
   void _seleccionar(int i) => setState(() => _indice = i);
